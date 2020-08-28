@@ -1,18 +1,20 @@
 import React,{useState} from 'react'
-import {View, Text, StyleSheet, Button, TextInput} from 'react-native'
+import {View, Text, StyleSheet, Button, TextInput, Alert, Keyboard} from 'react-native'
 
 import Card from '../components/Card'
 import StyleVar from '../styleVarriables/Varriables'
 import Input from '../components/Input'
+import NumberWrapper from '../components/NumberWrapper'
 
-const gameScreen = () => {
+const gameScreen = props => {
 
     const [inputNumber, setInputNumber] = useState('');
     const [comfirmed, setComfirmed] = useState(false);
     const [comfirmNumber, setComfirmNumber] = useState('');
 
     const inputHandeler = input => {
-        setInputNumber(input.replace(/[^0-9]/g,''))
+        setInputNumber(input);
+        setInputNumber(input.replace(/[^0-9]/g,''));
     }
 
     const resetNumber = () => {
@@ -20,11 +22,34 @@ const gameScreen = () => {
     }
 
     const comfirmHandeler = () => {
-        
+        if (isNaN(inputNumber) || inputNumber <= 0) {
+            Alert.alert(
+                //title 
+                'Invalid Number!',
+                // content
+                'Number has to be between 1 and 99',
+                // button[{text:'',style:'',onpress:}]
+                [{text: 'okay', style: 'destructive', onPress: resetNumber}]
+            )
+            return
+        };
+
+        setComfirmed(true);
+        setComfirmNumber(inputNumber);
+        setInputNumber('');
+        Keyboard.dismiss();
     }
 
+    
+
+    let comfirmNumText = <Card style={{padding:25, alignItems: 'center', width: 'auto'}}>
+                            <Text>selected number</Text>
+                            <NumberWrapper>{comfirmNumber}</NumberWrapper>
+                            <Button title="START GAME" onPress={props.startGameHandler.bind(this, comfirmNumber)}></Button>
+                        </Card>
+    
     return (
-        <View style={styles.screen}>
+        <View style={styles.screen}> 
             <Card style={{padding: 20}}>
                 <Text style={{textAlign:'center'}}>Input a number!</Text>
                 <View style={styles.inputWrapper}>
@@ -37,16 +62,18 @@ const gameScreen = () => {
                         <Button title="Reset" color={StyleVar.Primary} onPress={resetNumber}></Button>
                     </View>
                     <View style={styles.buttons}>
-                        <Button title="confirm" color={StyleVar.Secondary}></Button>
+                        <Button title="confirm" color={StyleVar.Secondary} onPress={comfirmHandeler}></Button>
                     </View>
                 </View>
             </Card>
+            {comfirmed === true ? comfirmNumText : null}
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     screen: {
+        flex: 1,
         alignItems: 'center',
         padding: 20,
     },
